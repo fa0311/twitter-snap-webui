@@ -25,7 +25,7 @@ javascript:(function() {
 
   if (match) {
     const tweetId = match[2];
-    const newUrl = `https://example.com/api/${tweetId}`;
+    const newUrl = `https://example.com/api/snap/2024/${tweetId}`;
     window.open(newUrl, '_blank');
   } else {
     alert('Error: The current page is not an individual Twitter tweet page.');

@@ -22,21 +22,22 @@ const nextcloud = webdav.createClient(process.env.WEBDAV_URL!, {
 });
 
 const outputDir = process.env.WEBDAV_OUTPUT_DIR!;
-
-const _ = makedirs(nextcloud, outputDir);
 const port = Number(process.env.PORT) || 3000;
 
 app.get(
-	"/api/:id",
+	"/api/snap/:dir/:id",
 	zValidator(
 		"param",
 		z.object({
 			id: z.string().regex(/^[0-9]{1,19}$/),
+			dir: z.string().regex(/^[a-zA-Z0-9_]{1,100}$/),
 		}),
 	),
 	async (c) => {
 		const [client, api] = await preloadClient;
 		const id = c.req.valid("param").id;
+		const dir = c.req.valid("param").dir;
+		
 		console.log(`snap tweet id: ${id}`);
 		await client(
 			{ id: id, limit: 1, type: "getTweetDetail", startId: id },
@@ -63,7 +64,8 @@ app.get(
 
 		const file = files[0];
 		const data = await fs.readFile(`temp/${file}`);
-		await nextcloud.putFileContents(`${outputDir}/${file}`, data);
+		await makedirs(nextcloud, `${outputDir}/${dir}`);
+		await nextcloud.putFileContents(`${outputDir}/${dir}/${file}`, data);
 		await fs.unlink(`temp/${file}`);
 
 		if (file.endsWith(".png")) {
